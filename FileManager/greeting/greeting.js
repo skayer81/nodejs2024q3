@@ -4,8 +4,10 @@ export class Greeting{
     #userName = 'Anonymous';
     #defaultUserNameKey = 'npm_config_username';
     #greetingText = 'Welcome to the File Manager';
+    #PartingTextBefore = 'Thank you for using File Manager';
+    #PartingTextAfter = 'goodbye'
 
-    constructor(){
+    constructor(rl){
         const name = process.env[this.#defaultUserNameKey];
         if (name){
             this.#userName = name ;
@@ -23,11 +25,19 @@ export class Greeting{
 
         }
         //console.log(this.#userName);
-        this.#outputGreeting()
+        this.#outputGreeting();
+        rl.on('SIGINT', () => {
+            this.#outputParting();
+        });
+
 
     }
     #outputGreeting(){
         console.log(`${this.#greetingText}, ${this.#userName}`)
+    }
+    #outputParting(){
+        console.log(`${this.#PartingTextBefore}, ${this.#userName}, ${this.#PartingTextAfter}`)
+      //  Thank you for using File Manager, Username, goodbye!
     }
 }
 
