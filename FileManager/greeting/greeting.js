@@ -28,6 +28,7 @@ export class Greeting{
         this.#outputGreeting();
         rl.on('SIGINT', () => {
             this.#outputParting();
+            rl.close();
         });
 
 
