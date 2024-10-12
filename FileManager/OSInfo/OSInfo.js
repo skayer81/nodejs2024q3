@@ -1,4 +1,5 @@
 import os from 'os'
+import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 
 export class OSInfo{
 
@@ -10,8 +11,14 @@ export class OSInfo{
         'username' : this.outputUsername,
         'architecture': this.outputArchitecture
     }
+    #eventEmitter = new EventEmitter()
+
+    constructor(){
+        this.#eventEmitter.on(this.#eventEmitter.events.os, this.executeСommand)
+    }
     
      executeСommand = (currentCommand) => {
+       // console.log
         currentCommand = String(currentCommand).trim().slice(this.#prefix.length).toLowerCase();
         this.#commands[currentCommand]()
      }

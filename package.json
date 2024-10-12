@@ -7,9 +7,9 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node FileManager/application/application.js -- --username=your_username2" ,
-    "start2": "node FileManager/application/application.js" ,
-    "test": "node FileManager/application/test.js" 
+    "start": "node FileManager/application.js -- --username=your_username2" ,
+    "start2": "node FileManager/application.js" ,
+    "test": "node FileManager/test.js" 
 
   },
 

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 
-export class HESHCalculator{
+export class HASHCalculator{
 
     #commands = {
         'hash': this.calculateHash,
