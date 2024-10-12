@@ -2,6 +2,8 @@ export class EventEmitter {
     #EVENTS = {
       os: 'os',
       hash : 'hash',
+      up : 'up',
+      cd: 'cd',
      // closeFullScreenImg : 'closeFullScreenImg'
     };
   

@@ -9,6 +9,7 @@ import { Greeting } from "./greeting/greeting.js";
 import { OSInfo } from './OSInfo/OSInfo.js';
 import { HASHCalculator } from './HASHCalculator/HASHCalculator.js';
 import { EventEmitter } from './eventEmitter/eventEmitter.js';
+import { Navigation } from './navigation/navigation.js';
 
 
 class Application{
@@ -16,6 +17,7 @@ class Application{
     #eventEmitter = new EventEmitter();
     #OSInfo = new OSInfo();
     #HASHCalculator = new HASHCalculator() 
+    #navigation = new Navigation()
 
     constructor(){
         this.rl = readline.createInterface({ input, output });
