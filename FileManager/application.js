@@ -23,6 +23,7 @@ class Application{
    // #ListOutput = new ListOutput()
 
     constructor(){
+        try{
         new ListOutput();
         new HASHCalculator();
         new Navigation();
@@ -31,12 +32,27 @@ class Application{
         this.rl = readline.createInterface({ input, output });
         this.rl.on('line', (input) => {
             const line = input.trim().split(" ");
+            try{
             this.#eventEmitter.emit(line.shift().trim(), [line.join(' ').trim()] )
-        });
+        }
+        catch(error){
+            console.error(error.message)
+        }
+
+        })}
+        catch(error){
+            console.error(error.message)
+        }
     }
 }
 
+try{
+
 const application = new Application()
+}
+catch(error){
+    console.error(error.message)
+}
 
 
 

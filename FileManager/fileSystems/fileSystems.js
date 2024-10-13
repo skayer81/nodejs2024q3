@@ -8,6 +8,9 @@ import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { resolve, join } from 'node:path';
 import  fs  from 'node:fs/promises';
 
+import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
+import { ErrorHandler } from '../errorHandler/errorHandler.js';
+
 
 export class FileSystems{
 
@@ -34,33 +37,66 @@ export class FileSystems{
       //  this.#eventEmitter.on(this.#eventEmitter.events.up, this.changeDir);
 //       Удалить файл:
 // rm path_to_file
+// rn path_to_file new_filename
         this.#eventEmitter.on(this.#eventEmitter.events.add, this.addFile)
         this.#eventEmitter.on(this.#eventEmitter.events.rm, this.removeFile)
+        this.#eventEmitter.on(this.#eventEmitter.events.rn, this.renameFile)
     }
 
     // addFile(){
 
     // }
 
-    addFile = async (fileName) => {
-        const filePath = join(cwd(), fileName);
-    //    const filePath = join(path, 'src','fs', 'files','fresh.txtc');
+    // rn "filemanager\test .  txt"   test2.txt
+
+    renameFile = async (paths) => {
+        const [filePath, newName] = this.getPaths(paths)
+      //  const filePath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'wrongFilename.txt')
+     //   const newPath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'properFilename.md')
     
         try {
-            const fileHandle = await fs.open(filePath, 'wx'); 
-           // await fileHandle.writeFile('I am fresh and young')
-            await fileHandle.close(); 
-        } catch (err) {//code: 'EPERM',
-            if (err.code === 'EEXIST') {
-                console.error('the file already exists');
-            } 
-            if (err.code === 'EPERM'){
-                console.error('operation not permitted');
+            await access(filePath, constants.F_OK)
+            await _rename(filePath, newPath)
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                console.error('FS operation failed');
+            } else {
+                console.log('err.code', err.code)
+                console.error(err);
             }
-            else {
-                console.error(err.message);
-            }
+        } 
+    };
+
+
+    addFile = async (fileName) => {
+        try{
+          if (!FilePathUtils.isFileName(fileName)){
+            throw new Error(`"${fileName}" is not name of file`)
+         }
+           const filePath = join(cwd(), fileName);
+           const fileHandle = await fs.open(filePath, 'wx'); 
+           await fileHandle.close();
         }
+        catch(error){
+          ErrorHandler.showError(error)
+        }
+    // //    const filePath = join(path, 'src','fs', 'files','fresh.txtc');
+    
+    //     try {
+    //         const fileHandle = await fs.open(filePath, 'wx'); 
+    //        // await fileHandle.writeFile('I am fresh and young')
+    //         await fileHandle.close(); 
+    //     } catch (err) {//code: 'EPERM',
+    //         if (err.code === 'EEXIST') {
+    //             console.error('the file already exists');
+    //         } 
+    //         if (err.code === 'EPERM'){
+    //             console.error('operation not permitted');
+    //         }
+    //         else {
+    //             console.error(err.message);
+    //         }
+    //     }
     }
 
     
