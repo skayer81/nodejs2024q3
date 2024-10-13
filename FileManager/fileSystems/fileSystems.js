@@ -5,11 +5,19 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { chdir, cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
+import { resolve, join } from 'node:path';
+import { open } from 'node:fs/promises';
 
 
-export class Navigation{
+export class FileSystems{
 
     #commands = {
+        cat: 'cat',
+        add: 'add',
+        rn: 'rn',
+        cp: 'cp',
+        mv: 'mv',
+        rm: 'rm',
         'up': this.upDir,
         'cd': this.changeDir,
         // 'homedir': this.outputHomedir,
@@ -17,11 +25,39 @@ export class Navigation{
         // 'architecture': this.outputArchitecture
     }
     #eventEmitter=  new EventEmitter()
+//     Создать пустой файл в текущем рабочем каталоге:
+// add new_file_name
 
     constructor(){
-        this.#eventEmitter.on(this.#eventEmitter.events.up, this.upDir);
+     //   this.#eventEmitter.on(this.#eventEmitter.events.up, this.upDir);
+
       //  this.#eventEmitter.on(this.#eventEmitter.events.up, this.changeDir);
-        this.#eventEmitter.on(this.#eventEmitter.events.cd, this.changeDir)
+        this.#eventEmitter.on(this.#eventEmitter.events.add, this.addFile)
+    }
+
+    // addFile(){
+
+    // }
+
+    addFile = async (fileName) => {
+        const filePath = join(cwd(), fileName);
+    //    const filePath = join(path, 'src','fs', 'files','fresh.txtc');
+    
+        try {
+            const fileHandle = await open(filePath, 'wx'); 
+           // await fileHandle.writeFile('I am fresh and young')
+            await fileHandle.close(); 
+        } catch (err) {//code: 'EPERM',
+            if (err.code === 'EEXIST') {
+                console.error('the file already exists');
+            } 
+            if (err.code === 'EPERM'){
+                console.error('operation not permitted');
+            }
+            else {
+                console.error(err.message);
+            }
+        }
     }
 
     //path.isAbsolute(path)

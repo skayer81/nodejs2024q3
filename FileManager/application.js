@@ -11,6 +11,7 @@ import { HASHCalculator } from './HASHCalculator/HASHCalculator.js';
 import { EventEmitter } from './eventEmitter/eventEmitter.js';
 import { Navigation } from './navigation/navigation.js';
 import { ListOutput } from './listOutput/listOutput.js';
+import { FileSystems } from './fileSystems/fileSystems.js';
 
 
 class Application{
@@ -26,10 +27,11 @@ class Application{
         new HASHCalculator();
         new Navigation();
         new OSInfo();
+        new FileSystems()
         this.rl = readline.createInterface({ input, output });
         this.rl.on('line', (input) => {
             const line = input.trim().split(" ");
-            this.#eventEmitter.emit(line.shift().trim(), [line.join('')] )
+            this.#eventEmitter.emit(line.shift().trim(), [line.join(' ')] )
         });
     }
 }
