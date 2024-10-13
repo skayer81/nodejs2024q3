@@ -9,24 +9,31 @@ import { resolve, join } from 'node:path';
 import  fs  from 'node:fs/promises';
 
 import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
-import { ErrorHandler } from '../errorHandler/errorHandler.js';
+import { OutputHandler } from '../outputHandler/outputHandler.js';
 
 
 export class FileSystems{
 
-    #commands = {
-        cat: 'cat',
-        add: 'add',
-        rn: 'rn',
-        cp: 'cp',
-        mv: 'mv',
-        rm: 'rm',
-        'up': this.upDir,
-        'cd': this.changeDir,
-        // 'homedir': this.outputHomedir,
-        // 'username' : this.outputUsername,
-        // 'architecture': this.outputArchitecture
+    #messages = {
+      isFileDel : 'file deleted',
+      isFileCreate : 'file created',
+      outputFileStart : 'file reading start',
+      outputFileEnd : 'file reading completed',
     }
+
+    // #commands = {
+    //     cat: 'cat',
+    //     add: 'add',
+    //     rn: 'rn',
+    //     cp: 'cp',
+    //     mv: 'mv',
+    //     rm: 'rm',
+    //     'up': this.upDir,
+    //     'cd': this.changeDir,
+    //     // 'homedir': this.outputHomedir,
+    //     // 'username' : this.outputUsername,
+    //     // 'architecture': this.outputArchitecture
+    // }
     #eventEmitter=  new EventEmitter()
 //     Создать пустой файл в текущем рабочем каталоге:
 // add new_file_name
@@ -38,9 +45,11 @@ export class FileSystems{
 //       Удалить файл:
 // rm path_to_file
 // rn path_to_file new_filename
+//cat path_to_file
         this.#eventEmitter.on(this.#eventEmitter.events.add, this.addFile)
         this.#eventEmitter.on(this.#eventEmitter.events.rm, this.removeFile)
         this.#eventEmitter.on(this.#eventEmitter.events.rn, this.renameFile)
+        this.#eventEmitter.on(this.#eventEmitter.events.cat, this.outputFile)
     }
 
     // addFile(){
@@ -49,21 +58,58 @@ export class FileSystems{
 
     // rn "filemanager\test .  txt"   test2.txt
 
+    outputFile = async (path) => {
+      //  const messageStart = 'file reading start';
+      //  const messageEnd = 'file reading completed';
+        path = resolve(path);
+        OutputHandler.showResult(this.#messages.outputFileStart)
+      //  console.log(`\x1b[32m${messageStart}\n\x1b[0m`);
+      //  try{
+           // await access(path, constants.F_OK)
+        const stream = createReadStream(path);
+        stream.on('data', (chank) => {
+               // process.stdout.write(chank)
+               OutputHandler.showFileText(chank)
+          //     console.log(`\x1b[32m${chank}\n\x1b[0m`);
+            }); 
+        stream.on('end', () => {
+                //     process.stdout.write(`HASH: ${hash.digest('hex')}\n`)
+                    // console.log(`\x1b[32m${messageEnd}\n\x1b[0m`);
+                     OutputHandler.showResult(this.#messages.outputFileEnd)
+                  })
+        stream.on('error', (error) => {
+            ErrorHandler.showError(error)
+        })
+
+      //  }
+        // catch(error){
+        //     console.log('ошибка')
+        //     console.log(error)
+        // }
+    }
+
     renameFile = async (paths) => {
-        const [filePath, newName] = this.getPaths(paths)
+        let [filePath, newName] = FilePathUtils.getPaths(paths)
+        filePath = resolve(filePath);
+        console.log(filePath);
       //  const filePath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'wrongFilename.txt')
      //   const newPath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'properFilename.md')
     
-        try {
+        try {            
+           if (!FilePathUtils.isFileName(newName)){
+                  throw new Error(`"${newName}" is not name of file`)
+           }  
             await access(filePath, constants.F_OK)
             await _rename(filePath, newPath)
-        } catch (err) {
-            if (err.code === 'ENOENT') {
-                console.error('FS operation failed');
-            } else {
-                console.log('err.code', err.code)
-                console.error(err);
-            }
+        } catch (error) {
+            console.log(error);
+            ErrorHandler.showError(error)
+            // if (err.code === 'ENOENT') {
+            //     console.error('FS operation failed');
+            // } else {
+            //     console.log('err.code', err.code)
+            //     console.error(err);
+            // }
         } 
     };
 
@@ -80,98 +126,51 @@ export class FileSystems{
         catch(error){
           ErrorHandler.showError(error)
         }
-    // //    const filePath = join(path, 'src','fs', 'files','fresh.txtc');
-    
-    //     try {
-    //         const fileHandle = await fs.open(filePath, 'wx'); 
-    //        // await fileHandle.writeFile('I am fresh and young')
-    //         await fileHandle.close(); 
-    //     } catch (err) {//code: 'EPERM',
-    //         if (err.code === 'EEXIST') {
-    //             console.error('the file already exists');
-    //         } 
-    //         if (err.code === 'EPERM'){
-    //             console.error('operation not permitted');
-    //         }
-    //         else {
-    //             console.error(err.message);
-    //         }
-    //     }
     }
 
     
-    removeFile = async (fileName) => {
-        const filePath = join(cwd(), fileName);
+    removeFile = async (filePath) => {
+        filePath = resolve(filePath);// join(cwd(), fileName);
         //import fs from 'fs/promises';
 
 try {
 	await fs.rm(filePath);
-	console.log('file deleted');
-} catch (err) {
-    if (err.code === 'ENOENT'){
-        console.error('no such file')
-    }
-    if (err.code === 'ERR_FS_EISDIR'){
-        console.error('is a directory')
-    }
-    // code: 'EISDIR',
-    // message: 'is a directory',
-    else {
-	console.log(err);
-    }
+    OutputHandler.showOperationError('file deleted')
+	//console.log('file deleted');
+} catch (error) {
+    OutputHandler.showOperationError(error)
 }
-// [Error: ENOENT: no such file or directory, lstat 'D:\NodeJS2024q3\FileManager\nodejs2024q3\filePath'] {
-//     errno: -4058,
-//     code: 'ENOENT',
-        // unlink(filePath)
-        //  .then()
-        //  .catch((err) => {
-        //     if (err.code === 'ENOENT') {
-        //         console.error('FS operation failed');
-        //     } else {
-        //         console.error(err);
-        //     }
-        // })
+
     };
 
-    //path.isAbsolute(path)
-//     import { chdir, cwd } from 'node:process';
-
-// console.log(`Запуск каталога: ${cwd()}`);
-// try {
-//     chdir('/tmp');
-//     console.log(`Новый каталог: ${cwd()}`);
-// } catch (err) {
-//     console.error(`chdir: ${err}`);
-//}
     
-     executeСommand = (filePath) => {
-        const currentCommand = 'hash'; //String(currentCommand).trim().slice(this.#prefix.length).toLowerCase();
-      //  console.log(this.#commands[currentCommand])
-        this.#commands[currentCommand].call(this, filePath)
-     }
+    //  executeСommand = (filePath) => {
+    //     const currentCommand = 'hash'; //String(currentCommand).trim().slice(this.#prefix.length).toLowerCase();
+    //   //  console.log(this.#commands[currentCommand])
+    //     this.#commands[currentCommand].call(this, filePath)
+    //  }
 
-     upDir(){
-        console.log(`Запуск каталога: ${cwd()}`);
-        console.log(`обрез`, dirname(cwd()))
-        try {
-            chdir(dirname(cwd()));
-        console.log(`Новый каталог: ${cwd()}`);
-       } catch (err) {
-          console.error(`chdir: ${err}`);
-     }
-    }
+    //  upDir(){
+    //     console.log(`Запуск каталога: ${cwd()}`);
+    //     console.log(`обрез`, dirname(cwd()))
+    //     try {
+    //         chdir(dirname(cwd()));
+    //     console.log(`Новый каталог: ${cwd()}`);
+    //    } catch (err) {
+    //       console.error(`chdir: ${err}`);
+    //  }
+    // }
 
-    changeDir(path){
-        console.log(`Запуск каталога: ${cwd()}`);
-        console.log(`путь`, path)
-        try {
-            chdir(path);
-        console.log(`Новый каталог: ${cwd()}`);
-       } catch (err) {
-          console.error(`chdir: ${err}`);
-     }
-    }
+    // changeDir(path){
+    //     console.log(`Запуск каталога: ${cwd()}`);
+    //     console.log(`путь`, path)
+    //     try {
+    //         chdir(path);
+    //     console.log(`Новый каталог: ${cwd()}`);
+    //    } catch (err) {
+    //       console.error(`chdir: ${err}`);
+    //  }
+    // }
 
 
      

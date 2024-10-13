@@ -3,8 +3,6 @@ import {
     stdin as input,
     stdout as output,
 } from 'node:process';
-import {homedir, cpus, userInfo} from 'node:os';
-
 import { Greeting } from "./greeting/greeting.js";
 import { OSInfo } from './OSInfo/OSInfo.js';
 import { HASHCalculator } from './HASHCalculator/HASHCalculator.js';
@@ -17,42 +15,23 @@ import { FileSystems } from './fileSystems/fileSystems.js';
 class Application{
 
     #eventEmitter = new EventEmitter();
-    // #OSInfo = new OSInfo();
-    // #HASHCalculator = new HASHCalculator() 
-    // #navigation = new Navigation()
-   // #ListOutput = new ListOutput()
 
     constructor(){
-        try{
+        this.rl = readline.createInterface({ input, output });
         new ListOutput();
         new HASHCalculator();
         new Navigation();
         new OSInfo();
-        new FileSystems()
-        this.rl = readline.createInterface({ input, output });
-        this.rl.on('line', (input) => {
+        new FileSystems();        
+        this.rl.on('line', (input) =>  {
             const line = input.trim().split(" ");
-            try{
             this.#eventEmitter.emit(line.shift().trim(), [line.join(' ').trim()] )
-        }
-        catch(error){
-            console.error(error.message)
-        }
-
-        })}
-        catch(error){
-            console.error(error.message)
-        }
+           // console.log('!!!!!!!!!!!!!!');
+        })
     }
 }
 
-try{
-
 const application = new Application()
-}
-catch(error){
-    console.error(error.message)
-}
 
 
 
