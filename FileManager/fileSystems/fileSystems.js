@@ -6,7 +6,7 @@ import { dirname } from 'path';
 import { chdir, cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { resolve, join } from 'node:path';
-import { open } from 'node:fs/promises';
+import  fs  from 'node:fs/promises';
 
 
 export class FileSystems{
@@ -32,7 +32,10 @@ export class FileSystems{
      //   this.#eventEmitter.on(this.#eventEmitter.events.up, this.upDir);
 
       //  this.#eventEmitter.on(this.#eventEmitter.events.up, this.changeDir);
+//       Удалить файл:
+// rm path_to_file
         this.#eventEmitter.on(this.#eventEmitter.events.add, this.addFile)
+        this.#eventEmitter.on(this.#eventEmitter.events.rm, this.removeFile)
     }
 
     // addFile(){
@@ -44,7 +47,7 @@ export class FileSystems{
     //    const filePath = join(path, 'src','fs', 'files','fresh.txtc');
     
         try {
-            const fileHandle = await open(filePath, 'wx'); 
+            const fileHandle = await fs.open(filePath, 'wx'); 
            // await fileHandle.writeFile('I am fresh and young')
             await fileHandle.close(); 
         } catch (err) {//code: 'EPERM',
@@ -59,6 +62,36 @@ export class FileSystems{
             }
         }
     }
+
+    
+    removeFile = async (fileName) => {
+        const filePath = join(cwd(), fileName);
+        //import fs from 'fs/promises';
+
+try {
+	await fs.rm(filePath);
+	console.log('file deleted');
+} catch (err) {
+    if (err.code === 'ENOENT'){
+        console.error('no such file or directory')
+    }
+    else {
+	console.log(err);
+    }
+}
+// [Error: ENOENT: no such file or directory, lstat 'D:\NodeJS2024q3\FileManager\nodejs2024q3\filePath'] {
+//     errno: -4058,
+//     code: 'ENOENT',
+        // unlink(filePath)
+        //  .then()
+        //  .catch((err) => {
+        //     if (err.code === 'ENOENT') {
+        //         console.error('FS operation failed');
+        //     } else {
+        //         console.error(err);
+        //     }
+        // })
+    };
 
     //path.isAbsolute(path)
 //     import { chdir, cwd } from 'node:process';
