@@ -4,6 +4,7 @@ export class EventEmitter {
       hash : 'hash',
       up : 'up',
       cd: 'cd',
+      ls: 'ls',
      // closeFullScreenImg : 'closeFullScreenImg'
     };
   
