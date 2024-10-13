@@ -4,6 +4,7 @@ import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 export class OSInfo{
 
     #prefix = '--';
+    #errorText = 'the key for the "os" command is incorrect'
     #commands = {
         'eol': this.outputEOL,
         'cpus': this.outputCpus,
@@ -18,9 +19,13 @@ export class OSInfo{
     }
     
      executeСommand = (currentCommand) => {
-       // console.log
         currentCommand = String(currentCommand).trim().slice(this.#prefix.length).toLowerCase();
-        this.#commands[currentCommand]()
+        try{
+         this.#commands[currentCommand]()
+        }
+        catch{
+          console.error(this.#errorText)
+        }       
      }
      
      outputEOL ()  {
@@ -41,8 +46,7 @@ export class OSInfo{
      }
      
      outputUsername ()  {
-        const { username } = os.userInfo();
-        console.log(`Username: ${username}`)
+        console.log(`Username: ${os.userInfo().username}`)
      }
      
      outputArchitecture()  {

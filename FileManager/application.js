@@ -16,32 +16,22 @@ import { ListOutput } from './listOutput/listOutput.js';
 class Application{
 
     #eventEmitter = new EventEmitter();
-    #OSInfo = new OSInfo();
-    #HASHCalculator = new HASHCalculator() 
-    #navigation = new Navigation()
-    #ListOutput = new ListOutput()
+    // #OSInfo = new OSInfo();
+    // #HASHCalculator = new HASHCalculator() 
+    // #navigation = new Navigation()
+   // #ListOutput = new ListOutput()
 
     constructor(){
+        new ListOutput();
+        new HASHCalculator();
+        new Navigation();
+        new OSInfo();
         this.rl = readline.createInterface({ input, output });
-     //   this.greeting = new Greeting(this.rl);
-      //  this.OSInfo = new OSInfo();
-    //    this.HASHCalculator = new HASHCalculator() 
         this.rl.on('line', (input) => {
-        //     const modules = {
-        //         'os': this.OSInfo.executeСommand,
-        //         'hash': this.HASHCalculator.executeСommand
-        //     } 
-        //   //  console.log(`Received: ${input}`);
-            const command = input.split(" ");
-            console.log('ввели', command);
-            this.#eventEmitter.emit(command[0], [command[1]] )
-           // modules[command[0]](command[1]);
+            const line = input.trim().split(" ");
+            this.#eventEmitter.emit(line.shift().trim(), [line.join('')] )
         });
-        console.log(homedir());
-        console.log(userInfo())
     }
-
-
 }
 
 const application = new Application()

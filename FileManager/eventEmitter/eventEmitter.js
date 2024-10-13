@@ -5,7 +5,6 @@ export class EventEmitter {
       up : 'up',
       cd: 'cd',
       ls: 'ls',
-     // closeFullScreenImg : 'closeFullScreenImg'
     };
   
     constructor() {
