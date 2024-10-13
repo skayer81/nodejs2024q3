@@ -19,7 +19,8 @@ export class Navigation{
     #eventEmitter=  new EventEmitter()
 
     constructor(){
-        this.#eventEmitter.on(this.#eventEmitter.events.up, this.upDir)
+        this.#eventEmitter.on(this.#eventEmitter.events.up, this.upDir);
+        this.#eventEmitter.on(this.#eventEmitter.events.cd, this.changeDir)
     }
 
     //path.isAbsolute(path)
@@ -44,6 +45,17 @@ export class Navigation{
         console.log(`обрез`, dirname(cwd()))
         try {
             chdir(dirname(cwd()));
+        console.log(`Новый каталог: ${cwd()}`);
+       } catch (err) {
+          console.error(`chdir: ${err}`);
+     }
+    }
+
+    changeDir(path){
+        console.log(`Запуск каталога: ${cwd()}`);
+        console.log(`путь`, path)
+        try {
+            chdir(path);
         console.log(`Новый каталог: ${cwd()}`);
        } catch (err) {
           console.error(`chdir: ${err}`);
