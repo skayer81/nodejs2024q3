@@ -1,5 +1,6 @@
 import os from 'os'
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
+import { OutputHandler } from '../outputHandler/outputHandler.js';
 
 export class OSInfo{
 
@@ -12,6 +13,14 @@ export class OSInfo{
         'username' : this.outputUsername,
         'architecture': this.outputArchitecture
     }
+    #outputStartMessage = {
+      EOL: 'EOL:',
+      cpus: 'total cpus:',
+      homedir: 'Homedir:',
+      username: 'Username:',
+      architecture: 'Architecture:'
+    }
+
     #eventEmitter = new EventEmitter()
 
     constructor(){
@@ -21,15 +30,16 @@ export class OSInfo{
      executeСommand = (currentCommand) => {
         currentCommand = String(currentCommand).trim().slice(this.#prefix.length).toLowerCase();
         try{
-         this.#commands[currentCommand]()
+         this.#commands[currentCommand].call(this)
         }
-        catch{
-          console.error(this.#errorText)
-        }       
+        catch (error){
+          OutputHandler.showInputError(this.#errorText)
+        }
+        OutputHandler.showCurrentDir();       
      }
      
      outputEOL ()  {
-        console.log(`EOL: ${JSON.stringify(os.EOL)}`)
+        OutputHandler.showResult(`${this.#outputStartMessage.EOL} ${JSON.stringify(os.EOL)}`)
      }
 
      outputCpus () {
@@ -37,20 +47,20 @@ export class OSInfo{
         const cpusInfo = os.cpus().map((item) => {
             return { model: item.model, speed: `${item.speed/MHzInGHz} GHz`}
        })       
-       console.table(cpusInfo)       
-       console.log(`total cpus: ${os.cpus().length}` )
+       console.table(cpusInfo)   
+       OutputHandler.showResult(`${this.#outputStartMessage.cpus} ${os.cpus().length}`)    
      }
 
      outputHomedir () {
-        console.log(`Homedir: ${os.homedir()}`)
+      OutputHandler.showResult(`${this.#outputStartMessage.homedir} ${os.homedir()}`) 
      }
      
      outputUsername ()  {
-        console.log(`Username: ${os.userInfo().username}`)
+      OutputHandler.showResult(`${this.#outputStartMessage.username} ${os.userInfo().username}`) 
      }
      
-     outputArchitecture()  {
-        console.log(`Architecture: ${os.arch()}`)
+     outputArchitecture()  {      
+       OutputHandler.showResult(`${this.#outputStartMessage.architecture} ${os.arch()}`) 
      }
  }
  

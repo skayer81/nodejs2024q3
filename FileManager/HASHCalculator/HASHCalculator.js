@@ -4,7 +4,6 @@ import { resolve } from 'path';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { OutputHandler } from '../outputHandler/outputHandler.js';
 
-
 export class HASHCalculator{
 
     #eventEmitter = new EventEmitter()
@@ -23,11 +22,12 @@ export class HASHCalculator{
           })
           .on('end', () => {
             OutputHandler.showResult(`HASH: ${hash.digest('hex')}`);
-            OutputHandler.showCurrentDir();
           })
           .on('error', (error) => {
-           OutputHandler.showOperationError(error)
+           OutputHandler.showOperationError(error);
           })
+          .on('close', () => {
+            OutputHandler.showCurrentDir();
+           })
     };
- }
- 
+ } 
