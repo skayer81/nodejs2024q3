@@ -26,7 +26,6 @@ class Application{
         this.rl.on('line', (input) =>  {
             const line = input.trim().split(" ");
             this.#eventEmitter.emit(line.shift().trim(), [line.join(' ').trim()] )
-           // console.log('!!!!!!!!!!!!!!');
         })
     }
 }

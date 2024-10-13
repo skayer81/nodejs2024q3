@@ -22,7 +22,8 @@ export class HASHCalculator{
             hash.update(chunk);
           })
           .on('end', () => {
-            OutputHandler.showResult(`HASH: ${hash.digest('hex')}`)
+            OutputHandler.showResult(`HASH: ${hash.digest('hex')}`);
+            OutputHandler.showCurrentDir();
           })
           .on('error', (error) => {
            OutputHandler.showOperationError(error)

@@ -1,12 +1,7 @@
-import { createHash } from 'crypto';
-import { createReadStream } from 'fs';
-//import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { chdir, cwd } from 'node:process';
+import { cwd } from 'node:process';
+import { readdir } from 'node:fs/promises';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
-import { readdir, stat } from 'node:fs/promises';
-import { resolve, extname , join} from 'node:path';
+import { OutputHandler } from '../outputHandler/outputHandler.js';
 
 
 export class ListOutput{
@@ -35,12 +30,10 @@ export class ListOutput{
                    return a.Name > b.Name
                 })               
                console.table(result)
-           }).catch((err) => {
-               if (err.code === 'ENOENT') {
-                   console.error('FS operation failed');
-               } else {
-                   console.error(err);
-               }
+           }).catch((error) => {
+                OutputHandler.showOperationError(error)
+           }).finally(() => {
+            OutputHandler.showCurrentDir();
            })
            ;
        };

@@ -1,3 +1,4 @@
+import { cwd } from 'node:process';
 export class OutputHandler{
 
     static errorMessages = {
@@ -28,8 +29,9 @@ export class OutputHandler{
         console.log(`\x1b[33m${message}\x1b[0m`);
     }
 
-    static showCurrentDir = (message) => {
-        console.log(`\x1b[34m${message}\x1b[0m`);
+    static showCurrentDir = () => {
+        const prefixText = 'You are currently in';// path_to_working_directory
+        console.log(`\x1b[34m${prefixText} ${cwd()}\x1b[0m`);
     }
 
 
