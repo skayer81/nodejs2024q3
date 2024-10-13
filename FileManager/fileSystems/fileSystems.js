@@ -73,8 +73,13 @@ try {
 	console.log('file deleted');
 } catch (err) {
     if (err.code === 'ENOENT'){
-        console.error('no such file or directory')
+        console.error('no such file')
     }
+    if (err.code === 'ERR_FS_EISDIR'){
+        console.error('is a directory')
+    }
+    // code: 'EISDIR',
+    // message: 'is a directory',
     else {
 	console.log(err);
     }
