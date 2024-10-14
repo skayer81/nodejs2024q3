@@ -9,7 +9,8 @@ export class Greeting{
     #greetingText = 'Welcome to the File Manager';
     #PartingTextBefore = 'Thank you for using File Manager';
     #PartingTextAfter = 'goodbye';
-    #userName = ''
+    #userName = '';
+    #description = `description: use double quotes if the command requires two paths and your paths have spaces \n eg (cp "path with spaces" "another path with spaces")`;
 
     #eventEmitter = new EventEmitter()
 
@@ -41,6 +42,7 @@ export class Greeting{
 
     #outputGreeting(){
         OutputHandler.showResult(`${this.#greetingText}, ${this.#userName}`)
+        console.log(this.#description);
         OutputHandler.showCurrentDir()
     }
     #outputParting() {

@@ -1,13 +1,3 @@
-//готовые модули:
-//OSInfo ++++++++++++++++++++
-//Navigation+++++++++++++++++++
-//HASHCalculator+++++++++++++++
-//Greeting+++++++++++++++++
-//FileSystems
-//Compressor++++++++++++++++++
-//ListOutput+++++++++++++++++++
-//Application
-
 import * as readline from 'node:readline/promises';
 import {
     stdin as input,
