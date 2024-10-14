@@ -7,10 +7,8 @@
   },
   "type": "module",
   "scripts": {
-    "start": "node FileManager/application.js --username=your_username2" ,
-    "start2": "node FileManager/application.js" ,
-    "test": "node FileManager/test.js" 
-
+    "start:n": "node FileManager/application.js --username=your_username" ,
+    "start": "node FileManager/application.js"
   },
 
   "author": "alreadybored",

@@ -1,3 +1,6 @@
+// исправить удаление, если файл не перенесся
+//исправить d:
+//испрравить ПР
 import * as readline from 'node:readline/promises';
 import {
     stdin as input,

@@ -29,13 +29,15 @@
   
       async handleStream(paths, operation) {
         try {
-          let [filePath, newDir] = FilePathUtils.getPaths(paths);
+          let [filePath, newfilePath] = FilePathUtils.getPaths(paths);
           FilePathUtils.checkPathIsEmpty(filePath, true);
-          newDir = newDir ? resolve(newDir) : dirname(filePath);
+          FilePathUtils.checkPathIsEmpty(newfilePath, true);
+         // newDir = newDir ? resolve(newDir) : dirname(filePath);
   
           const readStream = createReadStream(resolve(filePath));
-          const writeStream = createWriteStream(join(newDir, `${basename(filePath, extname(filePath))}${operation === this.#operations.compress ? this.#extname.compressed : this.#extname.decompressed}`));
-          const transformStream = operation === this.#operations.compress ? BrotliCompress() : BrotliDecompress();
+         // const writeStream = createWriteStream(join(newDir, `${basename(filePath, extname(filePath))}${operation === this.#operations.compress ? this.#extname.compressed : this.#extname.decompressed}`));
+         const writeStream = createWriteStream(resolve(newfilePath))
+           const transformStream = operation === this.#operations.compress ? BrotliCompress() : BrotliDecompress();
   
           pipeline(readStream, transformStream, writeStream, (error) => {
             if (error) {

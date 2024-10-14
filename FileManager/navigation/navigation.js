@@ -18,7 +18,11 @@ export class Navigation {
 
     changeDir = (path) => {
       try {
+        const diskPattern = /^[A-Z]:$/i; 
         FilePathUtils.checkPathIsEmpty(path);
+        if (diskPattern.test(path)) {
+            path = (`${path}\\`)
+        }          
         path = FilePathUtils.getResolvePath(path);
         chdir(path);
       } catch (error) {

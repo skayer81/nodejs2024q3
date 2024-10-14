@@ -27,17 +27,20 @@ export class FileSystems {
       this.#eventEmitter.on(this.#eventEmitter.events.mv, this.moveFile);
     }
 
-    #handleStream = async (filePath, newDir, message) => {
+    #handleStream = async (filePath, newDir) => {
       try {
+        FilePathUtils.checkPathIsEmpty(filePath, true);
+        FilePathUtils.checkPathIsEmpty(newDir);
+        filePath = resolve(filePath);
+        newDir = resolve(newDir);
         const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
         const readStream = createReadStream(filePath);
 
         readStream.pipe(writeStream);
         readStream.on('error', (error) => OutputHandler.showOperationError(error));
 
-        writeStream.on('finish', () => OutputHandler.showResult(message));
         writeStream.on('error', (error) => OutputHandler.showOperationError(error));
-        writeStream.on('close', () => OutputHandler.showCurrentDir());
+        return writeStream;
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
@@ -46,13 +49,13 @@ export class FileSystems {
     copyFile = async (paths) => {
       try {
         let [filePath, newDir] = FilePathUtils.getPaths(paths);
-        FilePathUtils.checkPathIsEmpty(filePath, true);
-        FilePathUtils.checkPathIsEmpty(newDir);
-        filePath = resolve(filePath);
-        newDir = resolve(newDir);
-        await this.#handleStream(filePath, newDir, this.#messages.isFileCopy);
+        const writeStream = await this.#handleStream(filePath, newDir);
+        if (writeStream) {
+          writeStream.on('finish', () => OutputHandler.showResult(this.#messages.isFileCopy));
+          writeStream.on('close', () => OutputHandler.showCurrentDir());
+        }
       } catch (error) {
-        OutputHandler.showOperationError(error);
+         OutputHandler.showOperationError(error);
       }
     };
 
@@ -116,10 +119,12 @@ export class FileSystems {
     moveFile = async (paths) => {
       try {
         let [filePath, newDir] = FilePathUtils.getPaths(paths);
-        filePath = resolve(filePath);
-        newDir = resolve(newDir);
-        await this.#handleStream(filePath, newDir, '');
-        await this.removeFile(filePath, this.#messages.isFileMove);
+        const writeStream = await this.#handleStream(filePath, newDir);
+        if (writeStream) { 
+          writeStream.on('finish', async () => {
+            await this.removeFile(filePath, this.#messages.isFileMove);
+          });
+        }
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
