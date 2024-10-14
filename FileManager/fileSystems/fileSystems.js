@@ -54,6 +54,7 @@ export class FileSystems{
         this.#eventEmitter.on(this.#eventEmitter.events.rn, this.renameFile)
         this.#eventEmitter.on(this.#eventEmitter.events.cat, this.outputFile)
         this.#eventEmitter.on(this.#eventEmitter.events.cp, this.copyFile)
+        this.#eventEmitter.on(this.#eventEmitter.events.mv, this.moveFile)
     }
 
     // addFile(){
@@ -61,6 +62,7 @@ export class FileSystems{
     // }
 
     // rn "filemanager\test .  txt"   test2.txt
+
     copyFile = async (paths) => {
         try {
             let [filePath, newDir] = FilePathUtils.getPaths(paths);
@@ -147,6 +149,33 @@ try {
 OutputHandler.showCurrentDir();
 
     };
+
+    moveFile = async (paths) => {
+        try {
+            let [filePath, newDir] = FilePathUtils.getPaths(paths);
+            filePath = resolve(filePath);
+            newDir = resolve(newDir);
+            const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
+  
+            const readStream = createReadStream(filePath)
+                .on('error', (error) => {
+                    OutputHandler.showOperationError(error);
+                });
+    
+            readStream.pipe(writeStream);
+    
+            writeStream.on('finish', () => {
+                OutputHandler.showResult(`copying completed`)
+                this.removeFile(filePath);
+            });    
+            writeStream.on('error', (error) => OutputHandler.showOperationError(error));
+            writeStream.on('close', () => OutputHandler.showCurrentDir());
+    
+        } catch (error) {
+            OutputHandler.showOperationError(error);
+        }
+       
+    }
 
     
     //  executeСommand = (filePath) => {
