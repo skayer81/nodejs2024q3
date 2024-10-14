@@ -2,6 +2,7 @@ import { dirname } from 'path';
 import { chdir, cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { OutputHandler } from '../outputHandler/outputHandler.js';
+import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
 
 export class Navigation {
     #eventEmitter= new EventEmitter()
@@ -17,6 +18,7 @@ export class Navigation {
 
     changeDir = (path) => {
       try {
+        FilePathUtils.checkPathIsEmpty(path);
         chdir(path);
       } catch (error) {
         OutputHandler.showOperationError(error);

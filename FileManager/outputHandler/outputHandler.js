@@ -7,6 +7,7 @@ export class OutputHandler{
         'EPERM' : 'operation not permitted',
         'ENOENT' : 'no such file or directory',
         'ERR_FS_EISDIR' : 'is a directory',
+        'Z_BUF_ERROR' : 'unexpected end of file'
     }
 
     static showOperationError = (error) => {

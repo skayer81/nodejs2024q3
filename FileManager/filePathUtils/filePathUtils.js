@@ -3,14 +3,22 @@ import { OutputHandler } from '../outputHandler/outputHandler.js';
 
 export class FilePathUtils {
 
+  static checkPathIsEmpty(path, isFile = false){
+    if  (!path || typeof path !== 'string') {
+        OutputHandler.showInputError(`${isFile ? 'file name' : 'path'} cannot be empty`)
+        throw new Error()
+    }
+  }
+
   static checkFileName(fileName) {
     let result = false
-    if (!fileName || typeof fileName !== 'string') {
+    this.checkPathIsEmpty(fileName, true)
+   // if (!fileName || typeof fileName !== 'string') {
       //return false;
       //throw new Error(`"${fileName}" is not name of file`)
-      OutputHandler.showInputError('file name cannot be empty')
-      throw new Error()
-    }
+    //   OutputHandler.showInputError('file name cannot be empty')
+    //   throw new Error()
+    // }
     const normalized = normalize(fileName);
     result = (normalized === basename(normalized));
     if (!result){

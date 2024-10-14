@@ -1,55 +1,50 @@
+import { EventEmitter } from "../eventEmitter/eventEmitter.js";
+import { FilePathUtils } from "../filePathUtils/filePathUtils.js";
+import { OutputHandler } from "../outputHandler/outputHandler.js";
 
 export class Greeting{
 
-    #userName = 'Anonymous';
-    #defaultUserNameKey = 'npm_config_username';
+    #defaultUserName = 'Anonymous';
+    #userNpmNameKey = 'npm_config_username';
+    #userArgvNameKey = '--username'
     #greetingText = 'Welcome to the File Manager';
     #PartingTextBefore = 'Thank you for using File Manager';
-    #PartingTextAfter = 'goodbye'
+    #PartingTextAfter = 'goodbye';
+    #userName = ''
+
+    #eventEmitter = new EventEmitter()
 
     constructor(rl){
-        const name = process.env[this.#defaultUserNameKey];
-        if (name){
-            this.#userName = name ;
-        }
-        else{
-            for (let i = 0; i < process.argv.length; i++ ){
-               
-                const item = process.argv[i];
-            //    console.log(item)
-                // if (item.startsWith(argPrefix) && process.argv[i+1]){
-                //         result.push(`${item} is ${process.argv[i+1]} `)
-                //         i++;
-                //     } 
-            }
-
-        }
-        //console.log(this.#userName);
+        this.rl = rl
+        this.#userName = this.#getUserName()
         this.#outputGreeting();
-        rl.on('SIGINT', () => {
-            this.#outputParting();
-            rl.close();
+
+        this.rl.on('SIGINT', () => {
+            this.#applicationExit();
         });
 
+        this.#eventEmitter.on(this.#eventEmitter.events[".exit"], this.#applicationExit)
+    }
 
+    #getUserName(){
+        let  name = process.env[this.#userNpmNameKey];
+        if (name){
+            return name
+        }
+        name = process.argv.find(item => item.startsWith(`${this.#userArgvNameKey}=`))?.split('=')[1];
+        return  name ? name : this.#defaultUserName;
     }
+
+    #applicationExit = () => {
+        this.#outputParting();
+        this.rl.close();
+    }
+
     #outputGreeting(){
-        console.log(`${this.#greetingText}, ${this.#userName}`)
+        OutputHandler.showResult(`${this.#greetingText}, ${this.#userName}`)
+        OutputHandler.showCurrentDir()
     }
-    #outputParting(){
-        console.log(`${this.#PartingTextBefore}, ${this.#userName}, ${this.#PartingTextAfter}`)
-      //  Thank you for using File Manager, Username, goodbye!
+    #outputParting() {
+         OutputHandler.showResult(`${this.#PartingTextBefore}, ${this.#userName}, ${this.#PartingTextAfter}`)
     }
 }
-
-// console.log("start")
-// const argPrefix = '--';
-// const result = [];
-
-
-//console.log(result.join())
-//console.log(process.env.npm_config_username)
-
-//readline
-
-//Попробуй получать имя пользователя из process.env.npm_config_username, если не найдено, то из process.argv

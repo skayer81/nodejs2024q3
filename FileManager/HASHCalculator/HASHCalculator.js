@@ -3,6 +3,7 @@ import { createReadStream } from 'fs';
 import { resolve } from 'path';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { OutputHandler } from '../outputHandler/outputHandler.js';
+import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
 
 export class HASHCalculator{
 
@@ -13,6 +14,8 @@ export class HASHCalculator{
     }
      
     async calculateHash(filePath) {
+      try{
+        FilePathUtils.checkPathIsEmpty(filePath);
         filePath = resolve(filePath);
         const hash = createHash('sha256');
         const fileStream = createReadStream(filePath);
@@ -29,5 +32,9 @@ export class HASHCalculator{
           .on('close', () => {
             OutputHandler.showCurrentDir();
            })
+      }
+      catch(error){
+        OutputHandler.showOperationError(error);
+      }
     };
  } 
