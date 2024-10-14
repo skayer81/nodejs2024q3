@@ -33,6 +33,9 @@ export class FileSystems {
         FilePathUtils.checkPathIsEmpty(newDir);
         filePath = resolve(filePath);
         newDir = resolve(newDir);
+        if (dirname(filePath) === newDir) {
+          throw new Error('cannot copy file to source folder')
+        }
         const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
         const readStream = createReadStream(filePath);
 
