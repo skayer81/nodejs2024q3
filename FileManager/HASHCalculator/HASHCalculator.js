@@ -1,6 +1,5 @@
 import { createHash } from 'crypto';
 import { createReadStream } from 'fs';
-import { resolve } from 'path';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { OutputHandler } from '../outputHandler/outputHandler.js';
 import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
@@ -16,7 +15,7 @@ export class HASHCalculator{
     async calculateHash(filePath) {
       try{
         FilePathUtils.checkPathIsEmpty(filePath);
-        filePath = resolve(filePath);
+        filePath = FilePathUtils.getResolvePath(filePath);
         const hash = createHash('sha256');
         const fileStream = createReadStream(filePath);
         fileStream

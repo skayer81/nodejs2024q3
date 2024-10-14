@@ -19,6 +19,7 @@ export class Navigation {
     changeDir = (path) => {
       try {
         FilePathUtils.checkPathIsEmpty(path);
+        path = FilePathUtils.getResolvePath(path);
         chdir(path);
       } catch (error) {
         OutputHandler.showOperationError(error);

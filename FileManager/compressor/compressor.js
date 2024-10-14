@@ -30,7 +30,7 @@
       async handleStream(paths, operation) {
         try {
           let [filePath, newDir] = FilePathUtils.getPaths(paths);
-          FilePathUtils.checkPathIsEmpty(paths, true);
+          FilePathUtils.checkPathIsEmpty(filePath, true);
           newDir = newDir ? resolve(newDir) : dirname(filePath);
   
           const readStream = createReadStream(resolve(filePath));
@@ -39,8 +39,7 @@
   
           pipeline(readStream, transformStream, writeStream, (error) => {
             if (error) {
-              //OutputHandler.showOperationError(error);
-              console.log(error)
+              OutputHandler.showOperationError(error);
             } else {
               OutputHandler.showResult(`${operation === this.#operations.compress ? this.#output.compress : this.#output.decompress} ${this.#output.complet}`)  
             }

@@ -1,5 +1,4 @@
 import { EventEmitter } from "../eventEmitter/eventEmitter.js";
-import { FilePathUtils } from "../filePathUtils/filePathUtils.js";
 import { OutputHandler } from "../outputHandler/outputHandler.js";
 
 export class Greeting{

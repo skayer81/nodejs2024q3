@@ -51,7 +51,7 @@ export class OSInfo {
             speed: `${speed / MHzInGHz} GHz`
         }));
 
-        console.table(cpusInfo);
+        OutputHandler.showTable(cpusInfo);
         OutputHandler.showResult(`${this.#outputStartMessage.cpus} ${os.cpus().length}`);
     }
 }

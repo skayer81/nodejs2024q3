@@ -1,6 +1,5 @@
 import { createReadStream, createWriteStream } from 'fs';
 import { dirname, basename } from 'path';
-import { cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { resolve, join } from 'node:path';
 import { rename, rm, open } from 'node:fs/promises';
@@ -12,6 +11,9 @@ export class FileSystems {
       isFileCreate: 'file created',
       outputFileStart: 'file reading start',
       outputFileEnd: 'file reading completed',
+      isFileRename: 'file renamed',
+      isFileCopy: 'file copied',
+      isFileMove: 'file moved',
     }
 
     #eventEmitter= new EventEmitter()
@@ -25,21 +27,30 @@ export class FileSystems {
       this.#eventEmitter.on(this.#eventEmitter.events.mv, this.moveFile);
     }
 
+    #handleStream = async (filePath, newDir, message) => {
+      try {
+        const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
+        const readStream = createReadStream(filePath);
+
+        readStream.pipe(writeStream);
+        readStream.on('error', (error) => OutputHandler.showOperationError(error));
+
+        writeStream.on('finish', () => OutputHandler.showResult(message));
+        writeStream.on('error', (error) => OutputHandler.showOperationError(error));
+        writeStream.on('close', () => OutputHandler.showCurrentDir());
+      } catch (error) {
+        OutputHandler.showOperationError(error);
+      }
+    }
+
     copyFile = async (paths) => {
       try {
         let [filePath, newDir] = FilePathUtils.getPaths(paths);
+        FilePathUtils.checkPathIsEmpty(filePath, true);
+        FilePathUtils.checkPathIsEmpty(newDir);
         filePath = resolve(filePath);
         newDir = resolve(newDir);
-        const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
-        const readStream = createReadStream(filePath)
-          .on('error', (error) => {
-            OutputHandler.showOperationError(error);
-          });
-
-        readStream.pipe(writeStream);
-        writeStream.on('finish', () => OutputHandler.showResult('copying completed'));
-        writeStream.on('error', (error) => OutputHandler.showOperationError(error));
-        writeStream.on('close', () => OutputHandler.showCurrentDir());
+        await this.#handleStream(filePath, newDir, this.#messages.isFileCopy);
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
@@ -47,9 +58,9 @@ export class FileSystems {
 
     outputFile = async (path) => {
       try {
-        path = resolve(path);
+        FilePathUtils.checkPathIsEmpty(path, true);
+        path = FilePathUtils.getResolvePath(path);
         OutputHandler.showResult(this.#messages.outputFileStart);
-
         const fileStream = createReadStream(path);
 
         fileStream
@@ -65,11 +76,11 @@ export class FileSystems {
     renameFile = async (paths) => {
       try {
         let [filePath, newName] = FilePathUtils.getPaths(paths);
-        FilePathUtils.checkFileName(newName, true);
+        FilePathUtils.checkFileName(newName);
         filePath = resolve(filePath);
         const newPath = join(dirname(filePath), newName);
         await rename(filePath, newPath);
-        OutputHandler.showResult('renaming completed');
+        OutputHandler.showResult(this.#messages.rename);
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
@@ -78,25 +89,28 @@ export class FileSystems {
 
     addFile = async (fileName) => {
       try {
-        FilePathUtils.checkFileName(fileName, true);
-        const filePath = join(cwd(), fileName);
+        FilePathUtils.checkFileName(fileName);
+        const filePath = FilePathUtils.getResolvePath(fileName);
         const fileHandle = await open(filePath, 'wx');
         await fileHandle.close();
+        OutputHandler.showResult(this.#messages.isFileCreate);
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
       OutputHandler.showCurrentDir();
     }
 
-    removeFile = async (filePath) => {
-      filePath = resolve(filePath);// join(cwd(), fileName);
+    removeFile = async (filePath, message = this.#messages.isFileDel) => {
       try {
+        FilePathUtils.checkPathIsEmpty(filePath, true);
+        filePath = FilePathUtils.getResolvePath(filePath);
         await rm(filePath);
-        OutputHandler.showOperationError('file deleted');
+        OutputHandler.showResult(message);
       } catch (error) {
         OutputHandler.showOperationError(error);
+      } finally {
+        OutputHandler.showCurrentDir();
       }
-      OutputHandler.showCurrentDir();
     };
 
     moveFile = async (paths) => {
@@ -104,23 +118,10 @@ export class FileSystems {
         let [filePath, newDir] = FilePathUtils.getPaths(paths);
         filePath = resolve(filePath);
         newDir = resolve(newDir);
-        const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
-
-        const readStream = createReadStream(filePath)
-          .on('error', (error) => {
-            OutputHandler.showOperationError(error);
-          });
-
-        readStream.pipe(writeStream);
-
-        writeStream.on('finish', () => {
-          OutputHandler.showResult('copying completed');
-          this.removeFile(filePath);
-        });
-        writeStream.on('error', (error) => OutputHandler.showOperationError(error));
-        writeStream.on('close', () => OutputHandler.showCurrentDir());
+        await this.#handleStream(filePath, newDir, '');
+        await this.removeFile(filePath, this.#messages.isFileMove);
       } catch (error) {
         OutputHandler.showOperationError(error);
       }
-    }
+    };
 }
