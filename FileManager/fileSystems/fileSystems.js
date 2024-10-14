@@ -1,8 +1,8 @@
 import { createHash } from 'crypto';
-import { createReadStream } from 'fs';
+import { createReadStream, createWriteStream } from 'fs';
 //import { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, basename } from 'path';
 import { chdir, cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { resolve, join } from 'node:path';
@@ -47,10 +47,13 @@ export class FileSystems{
 // rm path_to_file
 // rn path_to_file new_filename
 //cat path_to_file
+//cp path_to_file path_to_new_directory
+//mv path_to_file path_to_new_directory
         this.#eventEmitter.on(this.#eventEmitter.events.add, this.addFile)
         this.#eventEmitter.on(this.#eventEmitter.events.rm, this.removeFile)
         this.#eventEmitter.on(this.#eventEmitter.events.rn, this.renameFile)
         this.#eventEmitter.on(this.#eventEmitter.events.cat, this.outputFile)
+        this.#eventEmitter.on(this.#eventEmitter.events.cp, this.copyFile)
     }
 
     // addFile(){
@@ -58,6 +61,28 @@ export class FileSystems{
     // }
 
     // rn "filemanager\test .  txt"   test2.txt
+    copyFile = async (paths) => {
+        try {
+            let [filePath, newDir] = FilePathUtils.getPaths(paths);
+            filePath = resolve(filePath);
+            newDir = resolve(newDir);
+            const writeStream = createWriteStream(resolve(newDir, basename(filePath)));
+  
+            const readStream = createReadStream(filePath)
+                .on('error', (error) => {
+                    OutputHandler.showOperationError(error);
+                });
+    
+            readStream.pipe(writeStream);
+    
+            writeStream.on('finish', () => OutputHandler.showResult(`copying completed`));    
+            writeStream.on('error', (error) => OutputHandler.showOperationError(error));
+            writeStream.on('close', () => OutputHandler.showCurrentDir());
+    
+        } catch (error) {
+            OutputHandler.showOperationError(error);
+        }
+    };
 
     outputFile = async (path) => {
         try {
@@ -80,16 +105,16 @@ export class FileSystems{
 
     renameFile = async (paths) => {
         try { 
-        let [filePath, newName] = FilePathUtils.getPaths(paths)
-        FilePathUtils.checkFileName(newName, true);
-        filePath = resolve(filePath);
-        const newPath = join(dirname(filePath), newName)
-        await rename(filePath, newPath)
-        OutputHandler.showResult('renaming completed')
+          let [filePath, newName] = FilePathUtils.getPaths(paths)
+          FilePathUtils.checkFileName(newName, true);
+          filePath = resolve(filePath);
+          const newPath = join(dirname(filePath), newName)
+          await rename(filePath, newPath)
+          OutputHandler.showResult('renaming completed')
         } catch (error) {
             OutputHandler.showOperationError(error)
         } 
-        OutputHandler.showCurrentDir();
+          OutputHandler.showCurrentDir();
         
     };
 
