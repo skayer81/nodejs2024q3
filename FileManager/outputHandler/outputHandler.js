@@ -1,3 +1,4 @@
+import { table } from 'node:console';
 import { cwd } from 'node:process';
 export class OutputHandler{
 
@@ -10,13 +11,15 @@ export class OutputHandler{
 
     static showOperationError = (error) => {
         const prefixText = 'Operation failed'
-        let message = this.errorMessages[error.code] ?? error.message
-        console.error(`\x1b[31m${prefixText}: ${message}\x1b[0m`);
+        let message = this.errorMessages[error.code] ?? error.message;
+        if (message) {
+            console.error(`\x1b[31m${prefixText}: ${message}\x1b[0m`);
+        }
+
         }
 
     static showInputError = (message) => {
             const prefixText = 'Invalid input'
-           // let message = this.errorMessages[error.code] ?? error.message
             console.error(`\x1b[31m${prefixText}: ${message}\x1b[0m`);
     }           
     
@@ -30,8 +33,12 @@ export class OutputHandler{
     }
 
     static showCurrentDir = () => {
-        const prefixText = 'You are currently in';// path_to_working_directory
+        const prefixText = 'You are currently in';
         console.log(`\x1b[34m${prefixText} ${cwd()}\x1b[0m`);
+    }
+
+    static showTable = (data) => {
+        console.table(data)
     }
 
 

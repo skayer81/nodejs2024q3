@@ -6,7 +6,8 @@ import { dirname } from 'path';
 import { chdir, cwd } from 'node:process';
 import { EventEmitter } from '../eventEmitter/eventEmitter.js';
 import { resolve, join } from 'node:path';
-import  fs  from 'node:fs/promises';
+//import  fs  from 'node:fs/promises';
+import {rename, rm, open} from 'node:fs/promises';
 
 import { FilePathUtils } from '../filePathUtils/filePathUtils.js';
 import { OutputHandler } from '../outputHandler/outputHandler.js';
@@ -59,73 +60,51 @@ export class FileSystems{
     // rn "filemanager\test .  txt"   test2.txt
 
     outputFile = async (path) => {
-      //  const messageStart = 'file reading start';
-      //  const messageEnd = 'file reading completed';
-        path = resolve(path);
-        OutputHandler.showResult(this.#messages.outputFileStart)
-      //  console.log(`\x1b[32m${messageStart}\n\x1b[0m`);
-      //  try{
-           // await access(path, constants.F_OK)
-        const stream = createReadStream(path);
-        stream.on('data', (chank) => {
-               // process.stdout.write(chank)
-               OutputHandler.showFileText(chank)
-          //     console.log(`\x1b[32m${chank}\n\x1b[0m`);
-            }); 
-        stream.on('end', () => {
-                //     process.stdout.write(`HASH: ${hash.digest('hex')}\n`)
-                    // console.log(`\x1b[32m${messageEnd}\n\x1b[0m`);
-                     OutputHandler.showResult(this.#messages.outputFileEnd)
-                  })
-        stream.on('error', (error) => {
-            ErrorHandler.showError(error)
-        })
-
-      //  }
-        // catch(error){
-        //     console.log('ошибка')
-        //     console.log(error)
-        // }
-    }
+        try {
+          path = resolve(path);
+          OutputHandler.showResult(this.#messages.outputFileStart);
+      
+          const fileStream = createReadStream(path);
+      
+          fileStream
+            .on('data', (chunk) => OutputHandler.showFileText(chunk))
+            .on('end', () => OutputHandler.showResult(this.#messages.outputFileEnd))
+            .on('error', (error) => OutputHandler.showOperationError(error))
+            .on('close', () => OutputHandler.showCurrentDir());
+        } catch (error) {
+          OutputHandler.showOperationError(error);
+        }
+      };
+      
+      
 
     renameFile = async (paths) => {
+        try { 
         let [filePath, newName] = FilePathUtils.getPaths(paths)
+        FilePathUtils.checkFileName(newName, true);
         filePath = resolve(filePath);
-        console.log(filePath);
-      //  const filePath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'wrongFilename.txt')
-     //   const newPath = join(dirname(fileURLToPath(import.meta.url)), 'files', 'properFilename.md')
-    
-        try {            
-           if (!FilePathUtils.isFileName(newName)){
-                  throw new Error(`"${newName}" is not name of file`)
-           }  
-            await access(filePath, constants.F_OK)
-            await _rename(filePath, newPath)
+        const newPath = join(dirname(filePath), newName)
+        await rename(filePath, newPath)
+        OutputHandler.showResult('renaming completed')
         } catch (error) {
-            console.log(error);
-            ErrorHandler.showError(error)
-            // if (err.code === 'ENOENT') {
-            //     console.error('FS operation failed');
-            // } else {
-            //     console.log('err.code', err.code)
-            //     console.error(err);
-            // }
+            OutputHandler.showOperationError(error)
         } 
+        OutputHandler.showCurrentDir();
+        
     };
 
 
     addFile = async (fileName) => {
         try{
-          if (!FilePathUtils.isFileName(fileName)){
-            throw new Error(`"${fileName}" is not name of file`)
-         }
+          FilePathUtils.checkFileName(fileName, true)
            const filePath = join(cwd(), fileName);
-           const fileHandle = await fs.open(filePath, 'wx'); 
+           const fileHandle = await open(filePath, 'wx'); 
            await fileHandle.close();
         }
         catch(error){
-          ErrorHandler.showError(error)
+          OutputHandler.showOperationError(error)
         }
+        OutputHandler.showCurrentDir();
     }
 
     
@@ -134,12 +113,13 @@ export class FileSystems{
         //import fs from 'fs/promises';
 
 try {
-	await fs.rm(filePath);
+	await rm(filePath);
     OutputHandler.showOperationError('file deleted')
 	//console.log('file deleted');
 } catch (error) {
     OutputHandler.showOperationError(error)
 }
+OutputHandler.showCurrentDir();
 
     };
 

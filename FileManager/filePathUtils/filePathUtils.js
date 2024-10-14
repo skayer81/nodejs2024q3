@@ -1,12 +1,24 @@
 import { normalize, basename } from 'path';
+import { OutputHandler } from '../outputHandler/outputHandler.js';
 
 export class FilePathUtils {
-  static isFileName(fileName) {
+
+  static checkFileName(fileName) {
+    let result = false
     if (!fileName || typeof fileName !== 'string') {
-      return false;
+      //return false;
+      //throw new Error(`"${fileName}" is not name of file`)
+      OutputHandler.showInputError('file name cannot be empty')
+      throw new Error()
     }
     const normalized = normalize(fileName);
-    return normalized === basename(normalized);
+    result = (normalized === basename(normalized));
+    if (!result){
+        OutputHandler.showInputError(`"${fileName}" is not name of file`)
+        throw new Error()
+      //  throw new Error(`"${fileName}" is not name of file`)
+    }
+   // return result;
   }
 
   static getPaths(input) {
