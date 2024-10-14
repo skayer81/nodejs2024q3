@@ -11,11 +11,13 @@ import { Navigation } from './navigation/navigation.js';
 import { ListOutput } from './listOutput/listOutput.js';
 import { FileSystems } from './fileSystems/fileSystems.js';
 import { Compressor } from './compressor/compressor.js';
+import { OutputHandler } from './outputHandler/outputHandler.js';
 
 
 class Application{
 
     #eventEmitter = new EventEmitter();
+    #errorText = 'command does not exist';
 
     constructor(){
         this.rl = readline.createInterface({ input, output });
@@ -27,7 +29,13 @@ class Application{
         new Compressor()   ;   
         this.rl.on('line', (input) =>  {
             const line = input.trim().split(" ");
-            this.#eventEmitter.emit(line.shift().trim(), [line.join(' ').trim()] )
+            const command = line.shift().trim()
+            if (this.#eventEmitter.events[command]) {
+                this.#eventEmitter.emit(command, [line.join(' ').trim()] )
+                return
+            }
+            OutputHandler.showInputError(this.#errorText)
+            
         })
     }
 }
