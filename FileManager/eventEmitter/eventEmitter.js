@@ -11,6 +11,8 @@ export class EventEmitter {
       cp: 'cp',
       mv: 'mv',
       rm: 'rm',
+      compress: 'compress',
+      decompress: 'decompress'
     };
   
     constructor() {
